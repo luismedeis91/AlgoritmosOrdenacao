@@ -3,33 +3,20 @@ package ordenacao;
 import java.util.Arrays;
 import java.util.Random;
 
-/**
- * Bubble Sort
- *
- * Ideia: percorre o vetor varias vezes trocando pares vizinhos fora de ordem.
- * A cada passada, o maior elemento ainda nao ordenado "borbulha" ate o fim.
- *
- * Complexidade:
- *   - Pior caso / caso medio: O(n^2)
- *   - Melhor caso (vetor ja ordenado): O(n), gracas a flag "trocou"
- *   - Espaco: O(1) (in-place)
- *   - Estavel: sim
- */
+/** Bubble Sort: troca pares vizinhos fora de ordem ate nao sobrar nenhum. */
 public class BubbleSort {
 
     public static void sort(int[] a) {
         int n = a.length;
         for (int i = 0; i < n - 1; i++) {
             boolean trocou = false;
-            // os ultimos i elementos ja estao na posicao final
-            for (int j = 0; j < n - 1 - i; j++) {
+            for (int j = 0; j < n - 1 - i; j++) {   // os ultimos i ja estao no lugar
                 if (a[j] > a[j + 1]) {
                     swap(a, j, j + 1);
                     trocou = true;
                 }
             }
-            // nenhuma troca na passada => vetor ja esta ordenado
-            if (!trocou) break;
+            if (!trocou) break;                     // ja esta ordenado
         }
     }
 
@@ -47,13 +34,11 @@ public class BubbleSort {
     }
 
     public static void main(String[] args) {
-        // 1) exemplo simples
         int[] exemplo = {64, 34, 25, 12, 22, 11, 90};
         System.out.println("Antes:  " + Arrays.toString(exemplo));
         sort(exemplo);
         System.out.println("Depois: " + Arrays.toString(exemplo));
 
-        // 2) casos de borda
         int[][] bordas = { {}, {7}, {2, 1}, {5, 5, 5, 5}, {1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}, {-3, 0, -1, 8, -10} };
         for (int[] caso : bordas) {
             int[] copia = caso.clone();
@@ -62,7 +47,6 @@ public class BubbleSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // 3) teste aleatorio: compara com Arrays.sort
         Random rng = new Random(42);
         int testes = 1000;
         for (int t = 0; t < testes; t++) {
@@ -77,7 +61,6 @@ public class BubbleSort {
         }
         System.out.println(testes + " testes aleatorios passaram.");
 
-        // 4) tempo (so pra ter nocao do O(n^2))
         int n = 10_000;
         int[] grande = rng.ints(n, 0, 1_000_000).toArray();
         long inicio = System.nanoTime();

@@ -5,28 +5,7 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * Quick Sort paralelo (Fork/Join)
- *
- * Ideia: depois da particao, os lados esquerdo e direito do pivo sao
- * independentes, entao cada um vira uma tarefa no ForkJoinPool.
- *   1. Particiona (sequencial, mesma particao do QuickSort).
- *   2. Ordena os dois lados EM PARALELO (invokeAll).
- *
- * Detalhes desta implementacao:
- *   - Abaixo de LIMITE elementos usa o QuickSort sequencial.
- *   - Nao precisa de merge: quando os dois lados terminam, o vetor ja esta ordenado.
- *   - Particao do topo e sequencial (O(n)), entao o ganho cresce conforme a
- *     recursao abre mais tarefas.
- *   - Pivo aleatorio com ThreadLocalRandom (cada thread tem seu gerador).
- *
- * Complexidade:
- *   - Trabalho total esperado: O(n log n)
- *   - Tempo com p threads: ~O(n log n / p + n)
- *   - Pior caso: O(n^2) (muito improvavel com pivo aleatorio)
- *   - Espaco: O(log n) de pilha por tarefa
- *   - Estavel: nao
- */
+/** Quick Sort paralelo: os dois lados do pivo viram tarefas Fork/Join. */
 public class ParallelQuickSort {
 
     static final int LIMITE = 10_000;
@@ -53,12 +32,14 @@ public class ParallelQuickSort {
         @Override
         protected void compute() {
             if (hi - lo < LIMITE) {
-                QuickSort.quickSort(a, lo, hi);        // pedaco pequeno: sequencial
+                QuickSort.quickSort(a, lo, hi);
                 return;
             }
-            int p = QuickSort.partition(a, lo, hi);
-            invokeAll(new Tarefa(a, lo, p - 1),
-                      new Tarefa(a, p + 1, hi));       // lados disjuntos: sem corrida
+            long faixa = QuickSort.partition(a, lo, hi);
+            int lt = QuickSort.inicioDosIguais(faixa);
+            int gt = QuickSort.fimDosIguais(faixa);
+            invokeAll(new Tarefa(a, lo, lt - 1),
+                      new Tarefa(a, gt + 1, hi));   // lados disjuntos: sem corrida
         }
     }
 
@@ -72,13 +53,11 @@ public class ParallelQuickSort {
     public static void main(String[] args) {
         int threads = Runtime.getRuntime().availableProcessors();
 
-        // 1) exemplo simples
         int[] exemplo = {10, 80, 30, 90, 40, 50, 70};
         System.out.println("Antes:  " + Arrays.toString(exemplo));
         sort(exemplo, threads);
         System.out.println("Depois: " + Arrays.toString(exemplo));
 
-        // 2) casos de borda
         int[][] bordas = { {}, {7}, {2, 1}, {5, 5, 5, 5}, {1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}, {-3, 0, -1, 8, -10} };
         for (int[] caso : bordas) {
             int[] copia = caso.clone();
@@ -87,8 +66,7 @@ public class ParallelQuickSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // 3) teste aleatorio: compara com Arrays.sort
-        //    tamanhos ate 5 * LIMITE pra passar de fato pelo caminho paralelo
+        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 200;
         for (int t = 0; t < testes; t++) {
@@ -103,7 +81,6 @@ public class ParallelQuickSort {
         }
         System.out.println(testes + " testes aleatorios passaram.");
 
-        // 4) tempo: sequencial x paralelo com varias quantidades de threads
         int n = 1_000_000;
         int[] base = rng.ints(n, 0, 1_000_000).toArray();
 

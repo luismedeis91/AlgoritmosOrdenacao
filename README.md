@@ -8,8 +8,11 @@ src/ordenacao/
 ├── SelectionSort.java
 ├── QuickSort.java
 ├── MergeSort.java
-├── ParallelQuickSort.java   (Fork/Join, reaproveita QuickSort)
-└── ParallelMergeSort.java   (Fork/Join, reaproveita MergeSort)
+├── ParallelBubbleSort.java     (Fork/Join, variante par-ímpar)
+├── ParallelSelectionSort.java  (Fork/Join, redução do mínimo)
+├── ParallelQuickSort.java      (Fork/Join, reaproveita QuickSort)
+├── ParallelMergeSort.java      (Fork/Join, reaproveita MergeSort)
+└── Benchmark.java              (mede serial × paralelo e grava CSV)
 ```
 
 | Algoritmo | Melhor     | Médio      | Pior       | Espaço   | Estável |
@@ -27,6 +30,8 @@ java -cp out ordenacao.BubbleSort
 java -cp out ordenacao.SelectionSort
 java -cp out ordenacao.QuickSort
 java -cp out ordenacao.MergeSort
+java -cp out ordenacao.ParallelBubbleSort
+java -cp out ordenacao.ParallelSelectionSort
 java -cp out ordenacao.ParallelQuickSort
 java -cp out ordenacao.ParallelMergeSort
 ```
@@ -34,5 +39,29 @@ java -cp out ordenacao.ParallelMergeSort
 Cada `main` faz:
 1. um exemplo simples (antes/depois);
 2. casos de borda (vazio, 1 elemento, repetidos, já ordenado, invertido, negativos);
-3. 1000 testes aleatórios comparando com `Arrays.sort`;
-4. medição de tempo para ver a diferença entre O(n²) e O(n log n).
+3. testes aleatórios comparando com `Arrays.sort`;
+4. medição de tempo — nos paralelos, sequencial × 1, 2, 4, ... threads.
+
+As versões paralelas expõem `sort(int[] a, int threads)`, usam `ForkJoinPool`
+e caem na versão sequencial abaixo de `LIMITE` elementos.
+
+## Benchmark
+
+```bash
+java -cp out ordenacao.Benchmark   # ~2 min
+python3 scripts/graficos.py        # resumo.csv + figuras
+```
+
+O `Benchmark` varia o tamanho da entrada (2.500 a 20.000), a natureza da entrada
+(aleatória, ordenada, invertida, quase ordenada, com muitas repetições) e o número
+de threads (1, 2, 4, 8, ... até os núcleos da máquina), com 5 amostras de cada
+configuração, e grava os tempos crus em `resultados/tempos.csv`.
+
+O `scripts/graficos.py` lê esse CSV, grava `resultados/resumo.csv` com média, desvio
+padrão e speedup, e gera três figuras em `resultados/figuras/`:
+
+| Figura | Conteúdo |
+|--------|----------|
+| `fig1_tempo_vs_n` | tempo × n (log-log) na versão serial — O(n²) vs O(n log n) |
+| `fig2_speedup`    | speedup × threads, um painel por algoritmo |
+| `fig3_entradas`   | serial × paralelo para cada natureza de entrada |

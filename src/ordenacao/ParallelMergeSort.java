@@ -5,28 +5,7 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * Merge Sort paralelo (Fork/Join)
- *
- * Ideia: as duas metades do merge sort sao independentes, entao cada uma
- * vira uma tarefa que pode rodar em outra thread do ForkJoinPool.
- *   1. Divide o vetor ao meio.
- *   2. Ordena as duas metades EM PARALELO (invokeAll).
- *   3. Intercala as metades (merge sequencial, igual ao MergeSort).
- *
- * Detalhes desta implementacao:
- *   - Abaixo de LIMITE elementos usa o MergeSort sequencial: criar tarefa
- *     pra pedaco pequeno custa mais do que ordenar direto.
- *   - O vetor auxiliar e compartilhado: cada tarefa so mexe em aux[lo..hi],
- *     e as faixas das tarefas irmas nao se sobrepoem (sem condicao de corrida).
- *   - O numero de threads e o paralelismo do ForkJoinPool.
- *
- * Complexidade:
- *   - Trabalho total: O(n log n) (o mesmo do sequencial)
- *   - Tempo com p threads: ~O(n log n / p + n), o merge do topo e sequencial
- *   - Espaco: O(n) do vetor auxiliar
- *   - Estavel: sim
- */
+/** Merge Sort paralelo: as duas metades viram tarefas Fork/Join. */
 public class ParallelMergeSort {
 
     static final int LIMITE = 10_000;
@@ -55,13 +34,13 @@ public class ParallelMergeSort {
         @Override
         protected void compute() {
             if (hi - lo < LIMITE) {
-                MergeSort.mergeSort(a, aux, lo, hi);   // pedaco pequeno: sequencial
+                MergeSort.mergeSort(a, aux, lo, hi);
                 return;
             }
             int mid = lo + (hi - lo) / 2;
             invokeAll(new Tarefa(a, aux, lo, mid),
-                      new Tarefa(a, aux, mid + 1, hi)); // espera as duas terminarem
-            if (a[mid] <= a[mid + 1]) return;          // ja esta em ordem
+                      new Tarefa(a, aux, mid + 1, hi));   // faixas disjuntas: sem corrida
+            if (a[mid] <= a[mid + 1]) return;
             MergeSort.merge(a, aux, lo, mid, hi);
         }
     }
@@ -76,13 +55,11 @@ public class ParallelMergeSort {
     public static void main(String[] args) {
         int threads = Runtime.getRuntime().availableProcessors();
 
-        // 1) exemplo simples
         int[] exemplo = {38, 27, 43, 3, 9, 82, 10};
         System.out.println("Antes:  " + Arrays.toString(exemplo));
         sort(exemplo, threads);
         System.out.println("Depois: " + Arrays.toString(exemplo));
 
-        // 2) casos de borda
         int[][] bordas = { {}, {7}, {2, 1}, {5, 5, 5, 5}, {1, 2, 3, 4, 5}, {5, 4, 3, 2, 1}, {-3, 0, -1, 8, -10} };
         for (int[] caso : bordas) {
             int[] copia = caso.clone();
@@ -91,8 +68,7 @@ public class ParallelMergeSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // 3) teste aleatorio: compara com Arrays.sort
-        //    tamanhos ate 5 * LIMITE pra passar de fato pelo caminho paralelo
+        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 200;
         for (int t = 0; t < testes; t++) {
@@ -107,7 +83,6 @@ public class ParallelMergeSort {
         }
         System.out.println(testes + " testes aleatorios passaram.");
 
-        // 4) tempo: sequencial x paralelo com varias quantidades de threads
         int n = 1_000_000;
         int[] base = rng.ints(n, 0, 1_000_000).toArray();
 
