@@ -141,3 +141,13 @@ CORMEN, T. H.; LEISERSON, C. E.; RIVEST, R. L.; STEIN, C. *Algoritmos: teoria e 
 DIJKSTRA, E. W. *A discipline of programming*. Englewood Cliffs: Prentice-Hall, 1976.
 
 GRAMA, A.; GUPTA, A.; KARYPIS, G.; KUMAR, V. *Introduction to parallel computing*. 2. ed. Harlow: Addison-Wesley, 2003.
+
+KNUTH, D. E. *The art of computer programming: sorting and searching*. 2. ed. Reading: Addison-Wesley, 1998. v. 3.
+
+LEA, D. A Java fork/join framework. In: ACM CONFERENCE ON JAVA GRANDE, 2000, San Francisco. *Proceedings*. New York: ACM, 2000. p. 36-43.
+
+ORACLE. *Class ForkJoinPool: Java Platform, Standard Edition API Specification*. Disponível em: <https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ForkJoinPool.html>. Acesso em: 30 out. 2026.
+
+## Anexos
+
+O código-fonte completo dos oito algoritmos, a classe de benchmark, os arquivos de resultados (`tempos.csv` e `resumo.csv`) e os scripts de geração das figuras estão disponíveis no repositório: <https://github.com/luismedeis91/AlgoritmosOrdenacao>
