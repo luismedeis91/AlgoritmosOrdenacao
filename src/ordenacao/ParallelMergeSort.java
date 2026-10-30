@@ -39,7 +39,7 @@ public class ParallelMergeSort {
             }
             int mid = lo + (hi - lo) / 2;
             invokeAll(new Tarefa(a, aux, lo, mid),
-                      new Tarefa(a, aux, mid + 1, hi));   // faixas disjuntas: sem corrida
+                      new Tarefa(a, aux, mid + 1, hi));
             if (a[mid] <= a[mid + 1]) return;
             MergeSort.merge(a, aux, lo, mid, hi);
         }
@@ -68,7 +68,6 @@ public class ParallelMergeSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 200;
         for (int t = 0; t < testes; t++) {

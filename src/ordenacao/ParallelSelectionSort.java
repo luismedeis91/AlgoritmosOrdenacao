@@ -48,7 +48,7 @@ public class ParallelSelectionSort {
             int mid = lo + (hi - lo) / 2;
             Tarefa esquerda = new Tarefa(a, lo, mid);
             Tarefa direita  = new Tarefa(a, mid + 1, hi);
-            invokeAll(esquerda, direita);   // tarefas so leem o vetor: sem corrida
+            invokeAll(esquerda, direita);
             int e = esquerda.join();
             int d = direita.join();
             return a[e] <= a[d] ? e : d;
@@ -94,7 +94,6 @@ public class ParallelSelectionSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 20;
         for (int t = 0; t < testes; t++) {

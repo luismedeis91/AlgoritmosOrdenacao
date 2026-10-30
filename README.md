@@ -1,67 +1,75 @@
-# Algoritmos de Ordenação em Java
+# Ordenação Sequencial e Paralela em Java
 
-Cada algoritmo fica em uma classe própria, com uma `main` que testa a implementação.
+> Avaliação experimental de quatro algoritmos de ordenação com o framework **Fork/Join**.
+
+**Universidade de Fortaleza (UNIFOR)** · Centro de Ciências Tecnológicas · Ciência da Computação
+
+| Autor | Matrícula |
+|-------|-----------|
+| Luis Eduardo | 2413528 |
+| Theo Passos | 2416515 |
+
+---
+
+## Algoritmos
+
+| Algoritmo | Complexidade | Versão paralela |
+|-----------|--------------|-----------------|
+| Bubble    | O(n²)        | par-ímpar (*odd-even transposition*) |
+| Selection | O(n²)        | busca do mínimo como redução paralela |
+| Quick     | O(n log n)   | lados do pivô em tarefas · partição de 3 vias |
+| Merge     | O(n log n)   | metades em tarefas · intercalação sequencial |
+
+Todas as versões paralelas expõem `sort(int[] a, int threads)` e caem na versão
+sequencial abaixo de `LIMITE` (10.000 em Quick/Merge, 16.384 em Bubble/Selection).
+
+## Estrutura
 
 ```
 src/ordenacao/
-├── BubbleSort.java
-├── SelectionSort.java
-├── QuickSort.java
-├── MergeSort.java
-├── ParallelBubbleSort.java     (Fork/Join, variante par-ímpar)
-├── ParallelSelectionSort.java  (Fork/Join, redução do mínimo)
-├── ParallelQuickSort.java      (Fork/Join, reaproveita QuickSort)
-├── ParallelMergeSort.java      (Fork/Join, reaproveita MergeSort)
-└── Benchmark.java              (mede serial × paralelo e grava CSV)
+├── BubbleSort.java      ParallelBubbleSort.java
+├── SelectionSort.java   ParallelSelectionSort.java
+├── QuickSort.java       ParallelQuickSort.java
+├── MergeSort.java       ParallelMergeSort.java
+└── Benchmark.java
+scripts/graficos.py
 ```
-
-| Algoritmo | Melhor     | Médio      | Pior       | Espaço   | Estável |
-|-----------|------------|------------|------------|----------|---------|
-| Bubble    | O(n)       | O(n²)      | O(n²)      | O(1)     | sim     |
-| Selection | O(n²)      | O(n²)      | O(n²)      | O(1)     | não     |
-| Quick     | O(n log n) | O(n log n) | O(n²)      | O(log n) | não     |
-| Merge     | O(n log n) | O(n log n) | O(n log n) | O(n)     | sim     |
 
 ## Como rodar
 
 ```bash
 javac -d out src/ordenacao/*.java
-java -cp out ordenacao.BubbleSort
-java -cp out ordenacao.SelectionSort
-java -cp out ordenacao.QuickSort
-java -cp out ordenacao.MergeSort
-java -cp out ordenacao.ParallelBubbleSort
-java -cp out ordenacao.ParallelSelectionSort
-java -cp out ordenacao.ParallelQuickSort
-java -cp out ordenacao.ParallelMergeSort
+java -cp out ordenacao.QuickSort           # testes + tempo de um algoritmo
+java -cp out ordenacao.ParallelQuickSort   # sequencial × 1, 2, 4… threads
 ```
 
-Cada `main` faz:
-1. um exemplo simples (antes/depois);
-2. casos de borda (vazio, 1 elemento, repetidos, já ordenado, invertido, negativos);
-3. testes aleatórios comparando com `Arrays.sort`;
-4. medição de tempo — nos paralelos, sequencial × 1, 2, 4, ... threads.
-
-As versões paralelas expõem `sort(int[] a, int threads)`, usam `ForkJoinPool`
-e caem na versão sequencial abaixo de `LIMITE` elementos.
+Cada `main` roda um exemplo, casos de borda e testes aleatórios contra `Arrays.sort`.
 
 ## Benchmark
 
 ```bash
-java -cp out ordenacao.Benchmark   # ~2 min
-python3 scripts/graficos.py        # resumo.csv + figuras
+java -cp out ordenacao.Benchmark   # resultados/tempos.csv
+python3 scripts/graficos.py        # resultados/resumo.csv + figuras
 ```
 
-O `Benchmark` varia o tamanho da entrada (2.500 a 20.000), a natureza da entrada
-(aleatória, ordenada, invertida, quase ordenada, com muitas repetições) e o número
-de threads (1, 2, 4, 8, ... até os núcleos da máquina), com 5 amostras de cada
-configuração, e grava os tempos crus em `resultados/tempos.csv`.
+| Parâmetro | Valores |
+|-----------|---------|
+| n         | 2.500 · 5.000 · 10.000 · 20.000 |
+| Entradas  | aleatória · ordenada · invertida · quase ordenada · repetições |
+| Threads   | sequencial · 1 · 2 · 4 · 8 · 12 |
+| Amostras  | 5 por configuração → **2.400 medições** |
 
-O `scripts/graficos.py` lê esse CSV, grava `resultados/resumo.csv` com média, desvio
-padrão e speedup, e gera três figuras em `resultados/figuras/`:
+## Resultados
 
-| Figura | Conteúdo |
-|--------|----------|
-| `fig1_tempo_vs_n` | tempo × n (log-log) na versão serial — O(n²) vs O(n log n) |
-| `fig2_speedup`    | speedup × threads, um painel por algoritmo |
-| `fig3_entradas`   | serial × paralelo para cada natureza de entrada |
+Speedup em n = 20.000, entrada aleatória (i5-13420H, 12 threads, OpenJDK 27):
+
+| Algoritmo | 1    | 2        | 4    | 8    | 12   |
+|-----------|------|----------|------|------|------|
+| Bubble    | 1,99 | **2,42** | 1,38 | 1,37 | 1,40 |
+| Selection | 0,78 | 1,01     | 0,81 | 0,84 | 0,80 |
+| Quick     | 0,96 | 0,82     | 0,87 | 0,99 | 1,15 |
+| Merge     | 1,35 | **1,49** | 1,26 | 1,24 | 1,07 |
+
+- **O algoritmo pesa mais que o paralelismo** — Bubble sequencial é 194× mais lento que Quick sequencial.
+- **Nessa faixa de n, paralelizar não compensa** — o custo de criar e sincronizar tarefas supera o trabalho útil.
+- **A entrada importa** — Selection é indiferente ao conteúdo; Bubble varia quatro ordens de grandeza.

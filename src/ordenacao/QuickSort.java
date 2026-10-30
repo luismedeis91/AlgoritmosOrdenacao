@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-/** Quick Sort: particao de 3 vias com pivo aleatorio. */
 public class QuickSort {
 
     public static void sort(int[] a) {
@@ -16,7 +15,7 @@ public class QuickSort {
             long faixa = partition(a, lo, hi);
             int lt = inicioDosIguais(faixa);
             int gt = fimDosIguais(faixa);
-            if (lt - lo < hi - gt) {   // recursao no lado menor, laco no maior
+            if (lt - lo < hi - gt) {
                 quickSort(a, lo, lt - 1);
                 lo = gt + 1;
             } else {
@@ -26,13 +25,7 @@ public class QuickSort {
         }
     }
 
-    /**
-     * Deixa a[lo..lt-1] < pivo, a[lt..gt] == pivo, a[gt+1..hi] > pivo e devolve
-     * lt e gt empacotados num long. Tirar os iguais da recursao e o que evita o
-     * O(n^2) em entradas com poucos valores distintos.
-     */
     static long partition(int[] a, int lo, int hi) {
-        // ThreadLocalRandom: a versao paralela nao disputa o mesmo gerador
         int r = lo + ThreadLocalRandom.current().nextInt(hi - lo + 1);
         swap(a, lo, r);
         int pivo = a[lo];

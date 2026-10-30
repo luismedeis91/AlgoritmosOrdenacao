@@ -39,7 +39,7 @@ public class ParallelQuickSort {
             int lt = QuickSort.inicioDosIguais(faixa);
             int gt = QuickSort.fimDosIguais(faixa);
             invokeAll(new Tarefa(a, lo, lt - 1),
-                      new Tarefa(a, gt + 1, hi));   // lados disjuntos: sem corrida
+                      new Tarefa(a, gt + 1, hi));
         }
     }
 
@@ -66,7 +66,6 @@ public class ParallelQuickSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 200;
         for (int t = 0; t < testes; t++) {

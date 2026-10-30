@@ -3,13 +3,12 @@ package ordenacao;
 import java.util.Arrays;
 import java.util.Random;
 
-/** Selection Sort: acha o menor do que falta e troca pro inicio. */
 public class SelectionSort {
 
     public static void sort(int[] a) {
         int n = a.length;
         for (int i = 0; i < n - 1; i++) {
-            int min = i;   // a[0..i-1] ja tem os i menores, em ordem
+            int min = i;
             for (int j = i + 1; j < n; j++) {
                 if (a[j] < a[min]) {
                     min = j;

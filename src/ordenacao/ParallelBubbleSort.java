@@ -20,7 +20,6 @@ public class ParallelBubbleSort {
         ForkJoinPool pool = new ForkJoinPool(threads);
         try {
             int semTroca = 0;
-            // duas fases seguidas sem troca cobrem todos os pares vizinhos
             for (int fase = 0; fase < n && semTroca < 2; fase++) {
                 int inicio = fase % 2;
                 int pares = quantidadeDePares(n, inicio);
@@ -36,7 +35,6 @@ public class ParallelBubbleSort {
         }
     }
 
-    /** Pares (j, j+1) da fase, com j = inicio, inicio+2, ... */
     private static int quantidadeDePares(int n, int inicio) {
         if (n - 2 < inicio) return 0;
         return (n - 2 - inicio) / 2 + 1;
@@ -61,7 +59,7 @@ public class ParallelBubbleSort {
             int meio = k0 + (k1 - k0) / 2;
             Tarefa esquerda = new Tarefa(a, inicio, k0, meio);
             Tarefa direita  = new Tarefa(a, inicio, meio, k1);
-            invokeAll(esquerda, direita);   // pares disjuntos: sem corrida
+            invokeAll(esquerda, direita);
             return esquerda.join() || direita.join();
         }
     }
@@ -107,7 +105,6 @@ public class ParallelBubbleSort {
                     Arrays.toString(caso), Arrays.toString(copia), estaOrdenado(copia) ? "OK" : "FALHOU");
         }
 
-        // tamanhos acima de LIMITE pra passar pelo caminho paralelo
         Random rng = new Random(42);
         int testes = 20;
         for (int t = 0; t < testes; t++) {

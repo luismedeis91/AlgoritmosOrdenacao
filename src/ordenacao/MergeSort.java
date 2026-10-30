@@ -3,7 +3,6 @@ package ordenacao;
 import java.util.Arrays;
 import java.util.Random;
 
-/** Merge Sort: ordena as duas metades e intercala. O vetor auxiliar e reaproveitado. */
 public class MergeSort {
 
     public static void sort(int[] a) {
@@ -13,14 +12,13 @@ public class MergeSort {
 
     static void mergeSort(int[] a, int[] aux, int lo, int hi) {
         if (lo >= hi) return;
-        int mid = lo + (hi - lo) / 2;      // evita overflow de (lo + hi) / 2
+        int mid = lo + (hi - lo) / 2;
         mergeSort(a, aux, lo, mid);
         mergeSort(a, aux, mid + 1, hi);
-        if (a[mid] <= a[mid + 1]) return;  // as metades ja estao em ordem
+        if (a[mid] <= a[mid + 1]) return;
         merge(a, aux, lo, mid, hi);
     }
 
-    /** Intercala a[lo..mid] e a[mid+1..hi], ja ordenados. */
     static void merge(int[] a, int[] aux, int lo, int mid, int hi) {
         for (int k = lo; k <= hi; k++) {
             aux[k] = a[k];
@@ -30,7 +28,7 @@ public class MergeSort {
         for (int k = lo; k <= hi; k++) {
             if (i > mid)               a[k] = aux[j++];
             else if (j > hi)           a[k] = aux[i++];
-            else if (aux[i] <= aux[j]) a[k] = aux[i++];  // <= mantem a estabilidade
+            else if (aux[i] <= aux[j]) a[k] = aux[i++];
             else                       a[k] = aux[j++];
         }
     }

@@ -3,20 +3,19 @@ package ordenacao;
 import java.util.Arrays;
 import java.util.Random;
 
-/** Bubble Sort: troca pares vizinhos fora de ordem ate nao sobrar nenhum. */
 public class BubbleSort {
 
     public static void sort(int[] a) {
         int n = a.length;
         for (int i = 0; i < n - 1; i++) {
             boolean trocou = false;
-            for (int j = 0; j < n - 1 - i; j++) {   // os ultimos i ja estao no lugar
+            for (int j = 0; j < n - 1 - i; j++) {
                 if (a[j] > a[j + 1]) {
                     swap(a, j, j + 1);
                     trocou = true;
                 }
             }
-            if (!trocou) break;                     // ja esta ordenado
+            if (!trocou) break;
         }
     }
 
